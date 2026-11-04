@@ -157,3 +157,7 @@ uv pip install --python .venv/bin/python -r requirements_test.txt
 ```
 
 The suite has unit tests and BDD scenarios (`tests/bdd/features/*.feature`, run with pytest-bdd). It requires 100% line and branch coverage. Every HTTP call, including Ollama, is mocked; real network access is blocked during tests.
+
+## Licence
+
+MIT. See [LICENSE](LICENSE).

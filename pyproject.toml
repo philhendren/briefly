@@ -3,6 +3,7 @@ name = "briefly"
 version = "0.1.0"
 description = "Briefly: a Home Assistant news integration"
 requires-python = ">=3.13"
+license = "MIT"
 
 [dependency-groups]
 test = [
