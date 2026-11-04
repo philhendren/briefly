@@ -13,7 +13,9 @@ def story(title: str, source: str = "BBC News") -> Story:
 
 
 def test_script() -> None:
-    text = build_headline_script("Kiosk news", [story("Trains & buses <b>cut</b>."), story("Rain due", "The Guardian")])
+    text = build_headline_script(
+        "Kiosk news", [story("Trains & buses <b>cut</b>."), story("Rain due", "The Guardian")]
+    )
     assert text == (
         "Here are the top 2 headlines from Kiosk news. From BBC News: Trains and buses bcut/b. "
         "From The Guardian: Rain due."
@@ -21,7 +23,10 @@ def test_script() -> None:
 
 
 def test_empty_script() -> None:
-    assert build_headline_script("Kiosk news", [], "Sport") == "There are no headlines from Sport news right now."
+    assert (
+        build_headline_script("Kiosk news", [], "Sport")
+        == "There are no headlines from Sport news right now."
+    )
 
 
 def test_speakable() -> None:

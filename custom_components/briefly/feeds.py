@@ -90,7 +90,7 @@ def story_id(link: str) -> str:
 def _width(value: Any) -> int:
     try:
         return int(value)
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return UNKNOWN_WIDTH
 
 
@@ -106,8 +106,10 @@ def image_candidates(entry: Any) -> list[tuple[int, str]]:
         medium = (media.get("medium") or "").lower()
         # The Guardian gives only url and width, so an untyped item counts as an
         # image when it has a width or an image file extension.
-        untyped_image = not kind and not medium and (
-            "width" in media or _IMAGE_EXT.search(urlsplit(url or "").path)
+        untyped_image = (
+            not kind
+            and not medium
+            and ("width" in media or _IMAGE_EXT.search(urlsplit(url or "").path))
         )
         if url and (kind.startswith("image/") or medium == "image" or untyped_image):
             found.append((_width(media.get("width")), url))
@@ -127,9 +129,7 @@ def pick_images(candidates: list[tuple[int, str]]) -> tuple[str | None, str | No
     if not candidates:
         return None, None
     by_width = sorted(candidates, key=lambda item: item[0])
-    small = next(
-        (url for width, url in by_width if width >= SMALL_TARGET_WIDTH), by_width[-1][1]
-    )
+    small = next((url for width, url in by_width if width >= SMALL_TARGET_WIDTH), by_width[-1][1])
     large = by_width[-1][1]
     # BBC only publishes 240px thumbnails, but its image server takes the width
     # from the path, so ask it for sensible sizes instead.

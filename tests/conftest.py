@@ -18,12 +18,15 @@ def auto_enable_custom_integrations(enable_custom_integrations: None) -> None:
 @pytest.fixture(autouse=True)
 def image_cache_tmp(tmp_path) -> Generator[None]:
     """Keep the image cache inside the test's temp dir."""
-    with patch(
-        "custom_components.briefly.image_proxy.image_cache_dir",
-        return_value=tmp_path / "images",
-    ), patch(
-        "custom_components.briefly.coordinator.image_cache_dir",
-        return_value=tmp_path / "images",
+    with (
+        patch(
+            "custom_components.briefly.image_proxy.image_cache_dir",
+            return_value=tmp_path / "images",
+        ),
+        patch(
+            "custom_components.briefly.coordinator.image_cache_dir",
+            return_value=tmp_path / "images",
+        ),
     ):
         yield
 
@@ -39,4 +42,3 @@ def feeds(aioclient_mock):
 def ollama(aioclient_mock) -> FakeOllama:
     """A fake Ollama server."""
     return FakeOllama(aioclient_mock)
-

@@ -76,11 +76,7 @@ class BrieflyData:
 
     def all_stories(self) -> list[tuple[Section, Story]]:
         """Return every story with its section, section by section."""
-        return [
-            (section, story)
-            for section in self.sections.values()
-            for story in section.stories
-        ]
+        return [(section, story) for section in self.sections.values() for story in section.stories]
 
     def find_story(self, story_id: str) -> Story | None:
         """Return the story with this id, if it is currently listed."""
@@ -91,6 +87,4 @@ class BrieflyData:
 
     def count_status(self, status: str) -> int:
         """Return how many unique listed stories have this summary status."""
-        return len(
-            {story.id for _s, story in self.all_stories() if story.summary_status == status}
-        )
+        return len({story.id for _s, story in self.all_stories() if story.summary_status == status})

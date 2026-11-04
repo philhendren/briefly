@@ -13,7 +13,6 @@ from pathlib import Path
 import time
 
 from aiohttp import web
-
 from homeassistant.components.http import HomeAssistantView
 from homeassistant.core import HomeAssistant
 
@@ -80,9 +79,10 @@ class BrieflyImageView(HomeAssistantView):
         if url is None or http is None:
             return web.Response(status=404)
         ttl = IMAGE_CACHE_TTL.total_seconds()
-        path = image_cache_dir(self.hass) / hashlib.sha1(
-            url.encode(), usedforsecurity=False
-        ).hexdigest()
+        path = (
+            image_cache_dir(self.hass)
+            / hashlib.sha1(url.encode(), usedforsecurity=False).hexdigest()
+        )
         cached = await self.hass.async_add_executor_job(_read_cached, path, ttl)
         if cached is None:
             result = await http.fetch_image(url)

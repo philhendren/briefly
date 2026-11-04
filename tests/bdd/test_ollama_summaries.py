@@ -5,9 +5,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from pytest_bdd import given, parsers, scenarios, then, when
-
 from homeassistant.core import HomeAssistant
+from pytest_bdd import given, parsers, scenarios, then, when
 
 from ..helpers import FakeOllama, make_entry
 from .conftest import UK_SECTION, configure, refresh, setup_desk, start_flow
@@ -36,12 +35,16 @@ def publisher_refuses(aioclient_mock, host: str, status: int) -> None:
 
 
 @given(parsers.parse('a news desk with summaries written by "{model}"'))
-def desk_with_summaries(hass: HomeAssistant, ctx: dict[str, Any], aioclient_mock, model: str) -> None:
+def desk_with_summaries(
+    hass: HomeAssistant, ctx: dict[str, Any], aioclient_mock, model: str
+) -> None:
     setup_desk(hass, ctx, aioclient_mock, make_entry(summaries=True, override={"model": model}))
 
 
 @given(parsers.parse('a news desk with "{length}" summaries written by "{model}"'))
-def desk_with_length(hass: HomeAssistant, ctx: dict[str, Any], aioclient_mock, length: str, model: str) -> None:
+def desk_with_length(
+    hass: HomeAssistant, ctx: dict[str, Any], aioclient_mock, length: str, model: str
+) -> None:
     entry = make_entry(summaries=True, override={"model": model, "summary_length": length})
     setup_desk(hass, ctx, aioclient_mock, entry)
 
@@ -88,7 +91,8 @@ def summary_mentions(hass: HomeAssistant, prefix: str, text: str) -> None:
 @then(parsers.parse('the story "{prefix}" shows its feed description'))
 def feed_description(hass: HomeAssistant, prefix: str) -> None:
     found = story(hass, prefix)
-    assert found["summary"] == [] and found["description"]
+    assert found["summary"] == []
+    assert found["description"]
 
 
 @then(parsers.parse('Ollama was asked to use the model "{model}" with structured output'))

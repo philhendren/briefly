@@ -4,11 +4,10 @@ from __future__ import annotations
 
 from datetime import timedelta
 
-from pytest_homeassistant_custom_component.common import async_fire_time_changed
-
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
+from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
 from .helpers import BBC_UK, make_entry, setup_entry
 
@@ -45,4 +44,5 @@ async def test_conditional_refresh(hass: HomeAssistant, feeds) -> None:
     async_fire_time_changed(hass, dt_util.utcnow() + timedelta(minutes=31))
     await hass.async_block_till_done(wait_background_tasks=True)
     bbc = [c for c in feeds.mock_calls if str(c[1]) == BBC_UK]
-    assert bbc and bbc[0][3]["If-None-Match"] == '"bbc1"'
+    assert bbc
+    assert bbc[0][3]["If-None-Match"] == '"bbc1"'

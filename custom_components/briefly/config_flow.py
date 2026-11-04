@@ -6,8 +6,6 @@ import re
 from typing import Any
 
 import aiohttp
-import voluptuous as vol
-
 from homeassistant.config_entries import (
     ConfigFlow,
     ConfigFlowResult,
@@ -31,6 +29,7 @@ from homeassistant.helpers.selector import (
     TextSelectorConfig,
 )
 from homeassistant.util import slugify
+import voluptuous as vol
 
 from .const import (
     ALEXA_MEDIA_DOMAIN,
@@ -131,7 +130,7 @@ async def async_validate_feed(hass: HomeAssistant, url: str) -> bool:
             if resp.status != 200:
                 return False
             body = await resp.read()
-    except (aiohttp.ClientError, TimeoutError):
+    except aiohttp.ClientError, TimeoutError:
         return False
     try:
         parsed = await hass.async_add_executor_job(parse_feed, body, None)
@@ -144,8 +143,7 @@ def _preset_selector() -> SelectSelector:
     return SelectSelector(
         SelectSelectorConfig(
             options=[
-                SelectOptionDict(value=feed.key, label=feed.label)
-                for feed in PRESET_FEEDS.values()
+                SelectOptionDict(value=feed.key, label=feed.label) for feed in PRESET_FEEDS.values()
             ],
             multiple=True,
             mode=SelectSelectorMode.LIST,
@@ -153,7 +151,9 @@ def _preset_selector() -> SelectSelector:
     )
 
 
-def section_schema(defaults: dict[str, Any], *, add_another: bool, delete: bool = False) -> vol.Schema:
+def section_schema(
+    defaults: dict[str, Any], *, add_another: bool, delete: bool = False
+) -> vol.Schema:
     """Return the form for one section."""
     schema: dict[Any, Any] = {
         vol.Required(
@@ -266,9 +266,7 @@ class _SharedSteps:
             description_placeholders={"ollama_url": OLLAMA_DOWNLOAD_URL},
         )
 
-    async def async_step_ollama(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_ollama(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Point Briefly at an Ollama server and read its models."""
         errors: dict[str, str] = {}
         if user_input is not None:
@@ -295,9 +293,7 @@ class _SharedSteps:
             },
         )
 
-    async def async_step_model(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_model(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Pick a model from the ones Ollama has installed."""
         if user_input is not None:
             self._opts[CONF_MODEL] = user_input[CONF_MODEL]
@@ -313,9 +309,7 @@ class _SharedSteps:
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_MODEL, default=default): SelectSelector(
-                        SelectSelectorConfig(
-                            options=self._models, mode=SelectSelectorMode.DROPDOWN
-                        )
+                        SelectSelectorConfig(options=self._models, mode=SelectSelectorMode.DROPDOWN)
                     ),
                     vol.Required(
                         CONF_SUMMARY_LENGTH,
@@ -332,9 +326,7 @@ class _SharedSteps:
             description_placeholders={"ha_model": ha_model or "-"},
         )
 
-    async def async_step_voice(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_voice(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Optionally speak headlines on Alexa devices via Alexa Media Player."""
         errors: dict[str, str] = {}
         if user_input is not None:
@@ -392,9 +384,7 @@ class BrieflyConfigFlow(_SharedSteps, ConfigFlow, domain=DOMAIN):
         """Return the options flow."""
         return BrieflyOptionsFlow()
 
-    async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Name the desk."""
         errors: dict[str, str] = {}
         if user_input is not None:
@@ -408,9 +398,7 @@ class BrieflyConfigFlow(_SharedSteps, ConfigFlow, domain=DOMAIN):
                 return await self.async_step_section()
         return self.async_show_form(
             step_id="user",
-            data_schema=vol.Schema(
-                {vol.Required(CONF_NAME, default=DEFAULT_NAME): TextSelector()}
-            ),
+            data_schema=vol.Schema({vol.Required(CONF_NAME, default=DEFAULT_NAME): TextSelector()}),
             errors=errors,
         )
 
@@ -472,12 +460,12 @@ class BrieflyOptionsFlow(_SharedSteps, OptionsFlowWithReload):
     def _sections(self) -> list[dict[str, Any]]:
         return self._opts.setdefault(CONF_SECTIONS, [])
 
-    async def async_step_init(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Show the options menu."""
         self._opts = {**DEFAULT_SETTINGS, **self.config_entry.options}
-        self._opts[CONF_SECTIONS] = [dict(s) for s in self.config_entry.options.get(CONF_SECTIONS, [])]
+        self._opts[CONF_SECTIONS] = [
+            dict(s) for s in self.config_entry.options.get(CONF_SECTIONS, [])
+        ]
         return self.async_show_menu(
             step_id="init",
             menu_options=["settings", "add_section", "edit_section", "summaries", "voice"],
@@ -492,7 +480,10 @@ class BrieflyOptionsFlow(_SharedSteps, OptionsFlowWithReload):
         """Refresh interval, story counts, age and duplicate threshold."""
         if user_input is not None:
             self._opts.update(
-                {key: int(value) if key != CONF_DEDUP else value for key, value in user_input.items()}
+                {
+                    key: int(value) if key != CONF_DEDUP else value
+                    for key, value in user_input.items()
+                }
             )
             return self._save()
 
@@ -583,9 +574,7 @@ class BrieflyOptionsFlow(_SharedSteps, OptionsFlowWithReload):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Change or remove one section. Cached summaries are kept either way."""
-        index = next(
-            i for i, s in enumerate(self._sections) if s[CONF_SECTION_ID] == self._editing
-        )
+        index = next(i for i, s in enumerate(self._sections) if s[CONF_SECTION_ID] == self._editing)
         current = self._sections[index]
         errors: dict[str, str] = {}
         placeholders = {"url": "", "section": current[CONF_SECTION_NAME]}

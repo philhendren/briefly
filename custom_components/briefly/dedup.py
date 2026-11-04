@@ -7,9 +7,9 @@ import re
 from .models import Story
 
 _STOPWORDS = frozenset(
-    """a an and are as at be by for from has have he her his in is it its of on or
-    over says said she that the their they this to was were will with after into
-    up out new more than not but who what how why""".split()
+    """a an and are as at be by for from has have he her his in is it
+    its of on or over says said she that the their they this to was were will with
+    after into up out new more than not but who what how why""".split()  # noqa: SIM905
 )
 # Guardian and others append " | Author" or " - Outlet" to titles.
 _SUFFIX = re.compile(r"\s+[|–—-]\s+[^|–—-]{1,40}$")
@@ -23,9 +23,8 @@ def title_tokens(title: str) -> frozenset[str]:
     for word in _WORD.findall(text):
         if word in _STOPWORDS:
             continue
-        if len(word) > 3 and word.endswith("s") and not word.endswith("ss"):
-            word = word[:-1]
-        tokens.add(word)
+        plural = len(word) > 3 and word.endswith("s") and not word.endswith("ss")
+        tokens.add(word[:-1] if plural else word)
     return frozenset(tokens)
 
 

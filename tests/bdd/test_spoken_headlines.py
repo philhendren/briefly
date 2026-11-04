@@ -4,11 +4,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from pytest_bdd import given, parsers, scenarios, then, when
-from pytest_homeassistant_custom_component.common import async_mock_service
-
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ServiceValidationError
+from pytest_bdd import given, parsers, scenarios, then, when
+from pytest_homeassistant_custom_component.common import async_mock_service
 
 from custom_components.briefly.const import DOMAIN
 
@@ -29,7 +28,9 @@ def alexa_missing(hass: HomeAssistant) -> None:
 
 
 @given(parsers.parse('a news desk with spoken headlines on "{entity_id}"'))
-def desk_with_alexa(hass: HomeAssistant, ctx: dict[str, Any], aioclient_mock, entity_id: str) -> None:
+def desk_with_alexa(
+    hass: HomeAssistant, ctx: dict[str, Any], aioclient_mock, entity_id: str
+) -> None:
     entry = make_entry(alexa=True, override={"alexa_targets": [entity_id]})
     setup_desk(hass, ctx, aioclient_mock, entry)
 

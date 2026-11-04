@@ -23,7 +23,8 @@ async def test_round_trip_and_remove(hass: HomeAssistant, hass_storage) -> None:
 
     again = BrieflyCache(hass, "abc")
     await again.async_load()
-    assert again.is_seen("s1") and again.has_history
+    assert again.is_seen("s1")
+    assert again.has_history
     assert again.get_summary("s1")["summary"] == ["para"]
     assert again.host_blocked("example.com", now)
     await again.async_remove()

@@ -43,7 +43,9 @@ def test_parse_rss_source_override_and_html_description() -> None:
 
 
 def test_parse_atom() -> None:
-    parsed = parse_feed(atom("The Conversation", [Item("Atom story", "https://a.example/1")]).encode())
+    parsed = parse_feed(
+        atom("The Conversation", [Item("Atom story", "https://a.example/1")]).encode()
+    )
     assert parsed.title == "The Conversation"
     assert parsed.stories[0].title == "Atom story"
 
@@ -119,5 +121,8 @@ def test_text_helpers() -> None:
     assert truncate("short") == "short"
     long = "word " * 200
     cut = truncate(long, 50)
-    assert cut.endswith("…") and len(cut) <= 51
-    assert canonical_link("https://x.example/a?id=3&utm_medium=rss#top") == "https://x.example/a?id=3"
+    assert cut.endswith("…")
+    assert len(cut) <= 51
+    assert (
+        canonical_link("https://x.example/a?id=3&utm_medium=rss#top") == "https://x.example/a?id=3"
+    )

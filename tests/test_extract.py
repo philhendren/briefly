@@ -12,11 +12,14 @@ LONG = "This paragraph is comfortably longer than the forty character minimum."
 def test_extracts_article_paragraphs_only() -> None:
     text = extract_article_text(article_html(HOMES_PARAS))
     assert text.split("\n\n") == HOMES_PARAS
-    assert "Copyright" not in text and "iPlayer" not in text
+    assert "Copyright" not in text
+    assert "iPlayer" not in text
 
 
 def test_falls_back_to_all_paragraphs_without_article() -> None:
-    html = f"<html><body><div><p>{LONG}</p><p>Too short.</p><p>{LONG} Again.</p></div></body></html>"
+    html = (
+        f"<html><body><div><p>{LONG}</p><p>Too short.</p><p>{LONG} Again.</p></div></body></html>"
+    )
     assert extract_article_text(html) == f"{LONG}\n\n{LONG} Again."
 
 
@@ -27,7 +30,8 @@ def test_skips_scripts_figures_and_void_tags() -> None:
         f"<p>{LONG}</p><p>{LONG}</p><p>{LONG}</p></article>"
     )
     text = extract_article_text(html)
-    assert "caption" not in text and "bad()" not in text
+    assert "caption" not in text
+    assert "bad()" not in text
     assert text.startswith(f"{LONG} End.")
     assert text.count(LONG) == 2  # duplicates dropped
 

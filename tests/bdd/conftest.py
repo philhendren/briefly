@@ -10,13 +10,12 @@ from collections.abc import Coroutine
 from datetime import timedelta
 from typing import Any
 
-import pytest
-from pytest_bdd import given, parsers, then, when
-from pytest_homeassistant_custom_component.common import async_fire_time_changed
-
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
+import pytest
+from pytest_bdd import given, parsers, then, when
+from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
 from custom_components.briefly.const import DOMAIN
 
@@ -52,7 +51,9 @@ def start_flow(hass: HomeAssistant, ctx: dict[str, Any], aioclient_mock, name: s
         hass,
         hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER}),
     )
-    ctx["result"] = run(hass, hass.config_entries.flow.async_configure(result["flow_id"], {"name": name}))
+    ctx["result"] = run(
+        hass, hass.config_entries.flow.async_configure(result["flow_id"], {"name": name})
+    )
 
 
 def configure(hass: HomeAssistant, ctx: dict[str, Any], data: dict[str, Any]) -> dict[str, Any]:

@@ -4,9 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from pytest_bdd import parsers, scenarios, then, when
-
 from homeassistant.core import HomeAssistant
+from pytest_bdd import parsers, scenarios, then, when
 
 from .conftest import UK_SECTION, configure, settle, start_flow
 
@@ -38,8 +37,12 @@ def shown_as_list(ctx: dict[str, Any]) -> None:
     assert feed_selector(ctx).config["mode"] == "list"
 
 
-@when(parsers.parse('I set up a news desk called "{name}" with a section "{section}" using "{keys}"'))
-def set_up_desk(hass: HomeAssistant, ctx: dict[str, Any], aioclient_mock, name: str, section: str, keys: str) -> None:
+@when(
+    parsers.parse('I set up a news desk called "{name}" with a section "{section}" using "{keys}"')
+)
+def set_up_desk(
+    hass: HomeAssistant, ctx: dict[str, Any], aioclient_mock, name: str, section: str, keys: str
+) -> None:
     start_flow(hass, ctx, aioclient_mock, name)
     feeds = [key.strip() for key in keys.split(",")]
     configure(hass, ctx, {**UK_SECTION, "section_name": section, "feeds": feeds})
@@ -50,7 +53,9 @@ def set_up_desk(hass: HomeAssistant, ctx: dict[str, Any], aioclient_mock, name: 
 
 
 @when(parsers.parse('I add a section "{name}" with the custom feed "{url}" that serves a web page'))
-def add_bad_feed(hass: HomeAssistant, ctx: dict[str, Any], aioclient_mock, name: str, url: str) -> None:
+def add_bad_feed(
+    hass: HomeAssistant, ctx: dict[str, Any], aioclient_mock, name: str, url: str
+) -> None:
     aioclient_mock.get(url, text="<html><body>Hello</body></html>")
     configure(hass, ctx, {**UK_SECTION, "section_name": name, "feeds": [], "custom_feeds": url})
 

@@ -9,10 +9,36 @@ from .const import MAX_ARTICLE_CHARS
 
 MIN_PARAGRAPH_CHARS = 40
 _SKIP_TAGS = frozenset(
-    {"script", "style", "nav", "header", "footer", "aside", "form", "figure", "noscript", "svg", "button"}
+    {
+        "script",
+        "style",
+        "nav",
+        "header",
+        "footer",
+        "aside",
+        "form",
+        "figure",
+        "noscript",
+        "svg",
+        "button",
+    }
 )
 _VOID_TAGS = frozenset(
-    {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"}
+    {
+        "area",
+        "base",
+        "br",
+        "col",
+        "embed",
+        "hr",
+        "img",
+        "input",
+        "link",
+        "meta",
+        "source",
+        "track",
+        "wbr",
+    }
 )
 
 
@@ -66,7 +92,7 @@ def extract_article_text(html: str, limit: int = MAX_ARTICLE_CHARS) -> str:
     parser = _ArticleParser()
     parser.feed(html)
     parser.close()
-    parser._finish()  # noqa: SLF001 - flush an unclosed final paragraph
+    parser._finish()
     paragraphs = parser.article_paragraphs
     if sum(len(p) for p in paragraphs) < 200:
         paragraphs = parser.all_paragraphs

@@ -30,7 +30,7 @@ async def async_setup_entry(
 class BrieflyNewStoryEvent(BrieflyEntity, EventEntity):
     """Fires `new_story` when a story first appears in any section."""
 
-    _attr_event_types = [EVENT_NEW_STORY]
+    _attr_event_types = [EVENT_NEW_STORY]  # noqa: RUF012 - Home Assistant's attribute pattern
     _attr_translation_key = EVENT_NEW_STORY
 
     def __init__(self, coordinator: BrieflyCoordinator) -> None:

@@ -150,10 +150,13 @@ Story lists are kept out of the recorder, so the database doesn't grow. Each sto
 
 ## Development
 
+The project uses [uv](https://docs.astral.sh/uv/) for Python, dependencies and running tools, and [Ruff](https://docs.astral.sh/ruff/) for linting and formatting. Nothing else is needed.
+
 ```bash
-uv venv -p 3.14 .venv
-uv pip install --python .venv/bin/python -r requirements_test.txt
-.venv/bin/pytest
+uv sync                    # creates .venv with Python 3.14 and the locked dev dependencies
+uv run ruff check .        # lint
+uv run ruff format .       # format
+uv run pytest              # unit and BDD tests, 100% coverage required
 ```
 
 The suite has unit tests and BDD scenarios (`tests/bdd/features/*.feature`, run with pytest-bdd). It requires 100% line and branch coverage. Every HTTP call, including Ollama, is mocked; real network access is blocked during tests.

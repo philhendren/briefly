@@ -4,12 +4,11 @@ from __future__ import annotations
 
 from datetime import timedelta
 
-from pytest_homeassistant_custom_component.common import async_fire_time_changed
-
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util
+from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
 from custom_components.briefly.const import CONF_SECTIONS
 from custom_components.briefly.coordinator import section_feeds
@@ -53,10 +52,15 @@ async def test_summaries_written_and_cached(hass: HomeAssistant, feeds, ollama: 
     assert homes["summary"][0].startswith("The council has approved plans for 250 new homes")
     assert homes["key_facts"]
     last = hass.states.get("sensor.kiosk_news_last_updated").attributes
-    assert last["summarised"] == 4 and last["pending"] == 0 and last["errors"] == 0
+    assert last["summarised"] == 4
+    assert last["pending"] == 0
+    assert last["errors"] == 0
     # Leads first: the first two requests are the UK and Sport section leads.
-    heads = [r["messages"][1]["content"].split("Headline: ")[1].split("\n")[0] for r in ollama.requests]
-    assert heads[0].startswith("Council approves") and heads[1].startswith("Local club")
+    heads = [
+        r["messages"][1]["content"].split("Headline: ")[1].split("\n")[0] for r in ollama.requests
+    ]
+    assert heads[0].startswith("Council approves")
+    assert heads[1].startswith("Local club")
 
     # Each story is summarised once, even across refreshes.
     count = len(ollama.requests)
@@ -65,7 +69,9 @@ async def test_summaries_written_and_cached(hass: HomeAssistant, feeds, ollama: 
     assert by_title(hass, "Council approves")["summary_status"] == "done"
 
 
-async def test_summary_with_invented_number_is_rejected(hass: HomeAssistant, feeds, ollama: FakeOllama) -> None:
+async def test_summary_with_invented_number_is_rejected(
+    hass: HomeAssistant, feeds, ollama: FakeOllama
+) -> None:
     ollama.default = {"summary": ["The council approved 999 homes."], "key_facts": []}
     await setup_entry(hass, make_entry(summaries=True))
     homes = by_title(hass, "Council approves")
@@ -74,7 +80,9 @@ async def test_summary_with_invented_number_is_rejected(hass: HomeAssistant, fee
     assert homes["description"] == "Plans include a school and a health centre."
 
 
-async def test_ollama_down_retries_three_times(hass: HomeAssistant, feeds, ollama: FakeOllama) -> None:
+async def test_ollama_down_retries_three_times(
+    hass: HomeAssistant, feeds, ollama: FakeOllama
+) -> None:
     ollama.replies = [CONNECTION_ERROR] * 100
     await setup_entry(hass, make_entry(summaries=True))
     assert by_title(hass, "Council approves")["summary_status"] == "pending"
@@ -88,7 +96,9 @@ async def test_ollama_down_retries_three_times(hass: HomeAssistant, feeds, ollam
     assert len(ollama.requests) == calls  # gave up
 
 
-async def test_publisher_refusal_marks_site_feed_only(hass: HomeAssistant, aioclient_mock, ollama: FakeOllama) -> None:
+async def test_publisher_refusal_marks_site_feed_only(
+    hass: HomeAssistant, aioclient_mock, ollama: FakeOllama
+) -> None:
     aioclient_mock.get("https://www.bbc.co.uk/news/articles/homes1", status=403)
     register_feeds(aioclient_mock)
     await setup_entry(hass, make_entry(summaries=True, summaries_per_refresh=1))
@@ -99,8 +109,12 @@ async def test_publisher_refusal_marks_site_feed_only(hass: HomeAssistant, aiocl
     assert not any("rail1" in str(c[1]) for c in aioclient_mock.mock_calls)
 
 
-async def test_robots_disallow_and_thin_article(hass: HomeAssistant, aioclient_mock, ollama: FakeOllama) -> None:
-    aioclient_mock.get("https://www.bbc.co.uk/robots.txt", text="User-agent: *\nDisallow: /news/articles/homes1\n")
+async def test_robots_disallow_and_thin_article(
+    hass: HomeAssistant, aioclient_mock, ollama: FakeOllama
+) -> None:
+    aioclient_mock.get(
+        "https://www.bbc.co.uk/robots.txt", text="User-agent: *\nDisallow: /news/articles/homes1\n"
+    )
     aioclient_mock.get(
         "https://www.bbc.co.uk/news/articles/rail1", text="<p>Video only.</p>", headers=HTML
     )
@@ -119,8 +133,12 @@ async def test_new_story_event(hass: HomeAssistant, aioclient_mock) -> None:
     assert event.state == "unknown"  # nothing is "new" on the very first refresh
 
     aioclient_mock.clear_requests()
-    fresh = Item("Breaking: bridge reopens to traffic", "https://www.bbc.co.uk/news/articles/bridge1", age_minutes=1)
-    aioclient_mock.get(BBC_UK, text=rss("BBC News", [fresh]) , headers=XML)
+    fresh = Item(
+        "Breaking: bridge reopens to traffic",
+        "https://www.bbc.co.uk/news/articles/bridge1",
+        age_minutes=1,
+    )
+    aioclient_mock.get(BBC_UK, text=rss("BBC News", [fresh]), headers=XML)
     register_feeds(aioclient_mock)
     await refresh(hass)
     event = hass.states.get("event.kiosk_news_new_story")
@@ -156,7 +174,9 @@ async def test_partial_failure_and_stale_cache(hass: HomeAssistant, aioclient_mo
     assert hass.states.get("sensor.kiosk_news_last_updated").attributes["errors"] == 2
 
 
-async def test_not_modified_without_cache_counts_as_error(hass: HomeAssistant, aioclient_mock) -> None:
+async def test_not_modified_without_cache_counts_as_error(
+    hass: HomeAssistant, aioclient_mock
+) -> None:
     aioclient_mock.get(GUARDIAN_UK, status=304)
     register_feeds(aioclient_mock)
     await setup_entry(hass, make_entry())
@@ -217,11 +237,14 @@ async def test_button_refreshes(hass: HomeAssistant, feeds) -> None:
 def test_section_feeds_ignores_unknown_presets() -> None:
     refs = section_feeds({"feeds": ["bbc_uk", "gone"], "custom_feeds": [CUSTOM_FEED]})
     assert [r.url for r in refs] == [BBC_UK, CUSTOM_FEED]
-    assert refs[0].source == "BBC News" and refs[1].source is None
+    assert refs[0].source == "BBC News"
+    assert refs[1].source is None
     assert bbc_uk_feed()
 
 
-async def test_priority_order_skips_done_and_shared_stories(hass: HomeAssistant, feeds, ollama: FakeOllama) -> None:
+async def test_priority_order_skips_done_and_shared_stories(
+    hass: HomeAssistant, feeds, ollama: FakeOllama
+) -> None:
     from custom_components.briefly.models import BrieflyData, Section
 
     entry = make_entry(summaries=True)

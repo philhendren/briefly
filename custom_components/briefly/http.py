@@ -10,7 +10,6 @@ from urllib.parse import urlsplit
 from urllib.robotparser import RobotFileParser
 
 import aiohttp
-
 from homeassistant.util import dt as dt_util
 
 from .const import (
@@ -99,7 +98,7 @@ class BrieflyHttp:
         parser: RobotFileParser | None = RobotFileParser()
         try:
             status, body, _headers = await self._get(f"{root}/robots.txt")
-        except (aiohttp.ClientError, TimeoutError):
+        except aiohttp.ClientError, TimeoutError:
             # Unreachable: try again next time, fetch nothing meanwhile.
             return None
         if status == 200:
@@ -150,7 +149,7 @@ class BrieflyHttp:
         """Fetch an image; None if it is unavailable or not an image."""
         try:
             status, body, headers = await self._get(url)
-        except (aiohttp.ClientError, TimeoutError):
+        except aiohttp.ClientError, TimeoutError:
             return None
         content_type = headers.get("Content-Type", "").split(";")[0].strip().lower()
         if status != 200 or not content_type.startswith("image/"):

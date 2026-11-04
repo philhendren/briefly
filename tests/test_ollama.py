@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import pytest
-
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+import pytest
 
 from custom_components.briefly.ollama import (
     SUMMARY_SCHEMA,
@@ -84,7 +83,13 @@ def test_parse_summary_variants() -> None:
         Summary(["One line"], ["a", "b", "c"])
     )
     assert parse_summary('{"summary": ["x"]}') == Summary(["x"], [])
-    for bad in ("nope", "[1, 2]", '{"summary": 5}', '{"summary": ["x"], "key_facts": "y"}', '{"summary": [" "]}'):
+    for bad in (
+        "nope",
+        "[1, 2]",
+        '{"summary": 5}',
+        '{"summary": ["x"], "key_facts": "y"}',
+        '{"summary": [" "]}',
+    ):
         with pytest.raises(OllamaError):
             parse_summary(bad)
 

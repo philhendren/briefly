@@ -108,4 +108,3 @@ class BrieflyLastUpdatedSensor(BrieflyEntity, SensorEntity):
             "pending": data.count_status(STATUS_PENDING),
             "errors": data.errors,
         }
-

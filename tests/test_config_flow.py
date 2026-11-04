@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
-import pytest
-from pytest_homeassistant_custom_component.common import MockConfigEntry, async_mock_service
-
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigSubentryData
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
+import pytest
+from pytest_homeassistant_custom_component.common import MockConfigEntry, async_mock_service
 
-from custom_components.briefly.config_flow import hex_to_rgb, ollama_defaults, rgb_to_hex, split_urls
+from custom_components.briefly.config_flow import (
+    hex_to_rgb,
+    ollama_defaults,
+    rgb_to_hex,
+    split_urls,
+)
 from custom_components.briefly.const import DOMAIN
 
 from .helpers import (
@@ -25,12 +29,20 @@ from .helpers import (
     setup_entry,
 )
 
-UK = {"section_name": "UK", "colour": [30, 136, 229], "feeds": ["bbc_uk", "guardian_uk"], "custom_feeds": ""}
+UK = {
+    "section_name": "UK",
+    "colour": [30, 136, 229],
+    "feeds": ["bbc_uk", "guardian_uk"],
+    "custom_feeds": "",
+}
 
 
 async def start(hass: HomeAssistant):
-    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
-    assert result["type"] is FlowResultType.FORM and result["step_id"] == "user"
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "user"
     return result
 
 
@@ -39,7 +51,10 @@ async def configure(hass: HomeAssistant, result, data):
 
 
 def options_of(result) -> list:
-    return [o["value"] if isinstance(o, dict) else o for o in result["data_schema"].schema[_key(result, "feeds")].config["options"]]
+    return [
+        o["value"] if isinstance(o, dict) else o
+        for o in result["data_schema"].schema[_key(result, "feeds")].config["options"]
+    ]
 
 
 def _key(result, name):
@@ -50,13 +65,20 @@ def default_of(result, name):
     return _key(result, name).default()
 
 
-async def test_full_flow_with_ollama(hass: HomeAssistant, aioclient_mock, ollama: FakeOllama) -> None:
-    aioclient_mock.get(CUSTOM_FEED, text=rss("Local Gazette", [Item("Fete", "https://example.org/fete")]), headers=XML)
+async def test_full_flow_with_ollama(
+    hass: HomeAssistant, aioclient_mock, ollama: FakeOllama
+) -> None:
+    aioclient_mock.get(
+        CUSTOM_FEED,
+        text=rss("Local Gazette", [Item("Fete", "https://example.org/fete")]),
+        headers=XML,
+    )
     result = await start(hass)
     result = await configure(hass, result, {"name": "Kiosk news"})
     assert result["step_id"] == "section"
     # Sources are offered as a list (radio-style), with the UK suggestion pre-ticked.
-    assert "bbc_uk" in options_of(result) and "sky_uk" not in options_of(result)
+    assert "bbc_uk" in options_of(result)
+    assert "sky_uk" not in options_of(result)
     assert default_of(result, "section_name") == "UK"
     assert default_of(result, "feeds") == ["bbc_uk", "guardian_uk"]
 
@@ -66,7 +88,13 @@ async def test_full_flow_with_ollama(hass: HomeAssistant, aioclient_mock, ollama
     result = await configure(
         hass,
         result,
-        {"section_name": "Local", "colour": [1, 2, 3], "feeds": [], "custom_feeds": CUSTOM_FEED, "add_another": False},
+        {
+            "section_name": "Local",
+            "colour": [1, 2, 3],
+            "feeds": [],
+            "custom_feeds": CUSTOM_FEED,
+            "add_another": False,
+        },
     )
     assert result["step_id"] == "summaries"
     result = await configure(hass, result, {"summary_mode": "ollama"})
@@ -84,7 +112,8 @@ async def test_full_flow_with_ollama(hass: HomeAssistant, aioclient_mock, ollama
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "Kiosk news"
     options = result["options"]
-    assert options["ollama_url"] == OLLAMA_URL and options["model"] == "qwen3:14b"
+    assert options["ollama_url"] == OLLAMA_URL
+    assert options["model"] == "qwen3:14b"
     assert [s["id"] for s in options["sections"]] == ["uk", "local"]
     assert options["sections"][1]["custom_feeds"] == [CUSTOM_FEED]
     assert options["sections"][1]["colour"] == "#010203"
@@ -100,7 +129,9 @@ async def test_flow_without_summaries_and_with_alexa(hass: HomeAssistant, feeds)
     assert result["step_id"] == "voice"
     result = await configure(hass, result, {"alexa_enabled": True, "alexa_targets": []})
     assert result["errors"] == {"alexa_targets": "targets_required"}
-    result = await configure(hass, result, {"alexa_enabled": True, "alexa_targets": ["media_player.kitchen_echo"]})
+    result = await configure(
+        hass, result, {"alexa_enabled": True, "alexa_targets": ["media_player.kitchen_echo"]}
+    )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["options"]["alexa_targets"] == ["media_player.kitchen_echo"]
     assert result["options"]["summary_mode"] == "off"
@@ -111,7 +142,9 @@ async def test_alexa_needs_alexa_media_player(hass: HomeAssistant) -> None:
     result = await configure(hass, result, {"name": "Hall"})
     result = await configure(hass, result, {**UK, "add_another": False})
     result = await configure(hass, result, {"summary_mode": "off"})
-    result = await configure(hass, result, {"alexa_enabled": True, "alexa_targets": ["media_player.echo"]})
+    result = await configure(
+        hass, result, {"alexa_enabled": True, "alexa_targets": ["media_player.echo"]}
+    )
     assert result["errors"] == {"base": "alexa_media_missing"}
     assert "alexa_media_player" in result["description_placeholders"]["alexa_media_url"]
 
@@ -123,7 +156,8 @@ async def test_user_step_errors(hass: HomeAssistant, feeds) -> None:
     await setup_entry(hass, make_entry("Kiosk news"))
     result = await start(hass)
     result = await configure(hass, result, {"name": "Kiosk News"})
-    assert result["type"] is FlowResultType.ABORT and result["reason"] == "already_configured"
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "already_configured"
 
 
 @pytest.mark.parametrize(
@@ -133,9 +167,21 @@ async def test_user_step_errors(hass: HomeAssistant, feeds) -> None:
         ({"feeds": [], "custom_feeds": ""}, {"base": "no_feeds"}, {}),
         ({"custom_feeds": "ftp://x.example/feed"}, {"custom_feeds": "invalid_url"}, {}),
         ({"custom_feeds": CUSTOM_FEED}, {"custom_feeds": "invalid_feed"}, {"status": 404}),
-        ({"custom_feeds": CUSTOM_FEED}, {"custom_feeds": "invalid_feed"}, {"exc": CONNECTION_ERROR}),
-        ({"custom_feeds": CUSTOM_FEED}, {"custom_feeds": "invalid_feed"}, {"text": "<html>no</html>"}),
-        ({"custom_feeds": CUSTOM_FEED}, {"custom_feeds": "invalid_feed"}, {"text": rss("Empty", [])}),
+        (
+            {"custom_feeds": CUSTOM_FEED},
+            {"custom_feeds": "invalid_feed"},
+            {"exc": CONNECTION_ERROR},
+        ),
+        (
+            {"custom_feeds": CUSTOM_FEED},
+            {"custom_feeds": "invalid_feed"},
+            {"text": "<html>no</html>"},
+        ),
+        (
+            {"custom_feeds": CUSTOM_FEED},
+            {"custom_feeds": "invalid_feed"},
+            {"text": rss("Empty", [])},
+        ),
     ],
 )
 async def test_section_errors(hass: HomeAssistant, aioclient_mock, data, errors, mocks) -> None:
@@ -172,7 +218,12 @@ async def test_ollama_errors_and_ha_defaults(hass: HomeAssistant, aioclient_mock
         domain="ollama",
         data={"url": "http://gpu-box:11434"},
         subentries_data=[
-            ConfigSubentryData(data={"model": "qwen3:14b"}, subentry_type="conversation", title="Ollama", unique_id=None)
+            ConfigSubentryData(
+                data={"model": "qwen3:14b"},
+                subentry_type="conversation",
+                title="Ollama",
+                unique_id=None,
+            )
         ],
     ).add_to_hass(hass)
     aioclient_mock.get("http://down:11434/api/tags", exc=CONNECTION_ERROR)
@@ -198,7 +249,9 @@ async def test_ollama_errors_and_ha_defaults(hass: HomeAssistant, aioclient_mock
 
 async def test_ollama_defaults_fallbacks(hass: HomeAssistant) -> None:
     assert ollama_defaults(hass) == (None, None)
-    MockConfigEntry(domain="ollama", data={"url": "http://a:1"}, options={"model": "old:1"}).add_to_hass(hass)
+    MockConfigEntry(
+        domain="ollama", data={"url": "http://a:1"}, options={"model": "old:1"}
+    ).add_to_hass(hass)
     assert ollama_defaults(hass) == ("http://a:1", "old:1")
 
 
@@ -217,7 +270,9 @@ def test_colour_and_url_helpers() -> None:
 async def open_options(hass: HomeAssistant, entry, step: str):
     result = await hass.config_entries.options.async_init(entry.entry_id)
     assert result["type"] is FlowResultType.MENU
-    return await hass.config_entries.options.async_configure(result["flow_id"], {"next_step_id": step})
+    return await hass.config_entries.options.async_configure(
+        result["flow_id"], {"next_step_id": step}
+    )
 
 
 async def options_configure(hass: HomeAssistant, result, data):
@@ -232,11 +287,18 @@ async def test_options_settings(hass: HomeAssistant, feeds) -> None:
     result = await options_configure(
         hass,
         result,
-        {"refresh_minutes": 15.0, "stories_per_section": 5, "max_age_hours": 24, "summaries_per_refresh": 2, "dedup": "strict"},
+        {
+            "refresh_minutes": 15.0,
+            "stories_per_section": 5,
+            "max_age_hours": 24,
+            "summaries_per_refresh": 2,
+            "dedup": "strict",
+        },
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     await hass.async_block_till_done()
-    assert entry.options["refresh_minutes"] == 15 and entry.options["dedup"] == "strict"
+    assert entry.options["refresh_minutes"] == 15
+    assert entry.options["dedup"] == "strict"
     assert entry.runtime_data.coordinator.update_interval.total_seconds() == 900
 
 
@@ -244,7 +306,9 @@ async def test_options_add_section(hass: HomeAssistant, feeds) -> None:
     entry = make_entry()
     await setup_entry(hass, entry)
     result = await open_options(hass, entry, "add_section")
-    result = await options_configure(hass, result, {**UK, "section_name": "More UK", "custom_feeds": "nope"})
+    result = await options_configure(
+        hass, result, {**UK, "section_name": "More UK", "custom_feeds": "nope"}
+    )
     assert result["errors"] == {"custom_feeds": "invalid_url"}
     result = await options_configure(hass, result, {**UK, "section_name": "More UK"})
     assert result["type"] is FlowResultType.CREATE_ENTRY
@@ -261,11 +325,14 @@ async def test_options_edit_and_remove_section(hass: HomeAssistant, feeds) -> No
     assert result["description_placeholders"]["section"] == "Sport"
     result = await options_configure(hass, result, {**UK, "section_name": "UK", "delete": False})
     assert result["errors"] == {"section_name": "name_exists"}
-    result = await options_configure(hass, result, {**UK, "section_name": "Football", "delete": False})
+    result = await options_configure(
+        hass, result, {**UK, "section_name": "Football", "delete": False}
+    )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     await hass.async_block_till_done()
     sections = entry.options["sections"]
-    assert sections[1]["id"] == "sport" and sections[1]["section_name"] == "Football"
+    assert sections[1]["id"] == "sport"
+    assert sections[1]["section_name"] == "Football"
 
     result = await open_options(hass, entry, "edit_section")
     result = await options_configure(hass, result, {"edit_section_id": "uk"})
@@ -284,7 +351,8 @@ async def test_options_no_sections(hass: HomeAssistant, feeds) -> None:
     entry = make_entry(sections=[])
     await setup_entry(hass, entry)
     result = await open_options(hass, entry, "edit_section")
-    assert result["type"] is FlowResultType.ABORT and result["reason"] == "no_sections"
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "no_sections"
 
 
 async def test_options_summaries_and_voice(hass: HomeAssistant, feeds, ollama: FakeOllama) -> None:
@@ -293,7 +361,9 @@ async def test_options_summaries_and_voice(hass: HomeAssistant, feeds, ollama: F
     result = await open_options(hass, entry, "summaries")
     result = await options_configure(hass, result, {"summary_mode": "ollama"})
     result = await options_configure(hass, result, {"ollama_url": OLLAMA_URL})
-    result = await options_configure(hass, result, {"model": "llama3.2:3b", "summary_length": "headline"})
+    result = await options_configure(
+        hass, result, {"model": "llama3.2:3b", "summary_length": "headline"}
+    )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     await hass.async_block_till_done(wait_background_tasks=True)
     assert entry.options["model"] == "llama3.2:3b"
@@ -314,7 +384,9 @@ async def test_options_summaries_and_voice(hass: HomeAssistant, feeds, ollama: F
 
     async_mock_service(hass, "notify", "alexa_media")
     result = await open_options(hass, entry, "voice")
-    result = await options_configure(hass, result, {"alexa_enabled": True, "alexa_targets": ["media_player.kitchen_echo"]})
+    result = await options_configure(
+        hass, result, {"alexa_enabled": True, "alexa_targets": ["media_player.kitchen_echo"]}
+    )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     await hass.async_block_till_done()
     assert entry.options["alexa_enabled"] is True

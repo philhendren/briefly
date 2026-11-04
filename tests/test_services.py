@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-import pytest
-from pytest_homeassistant_custom_component.common import async_mock_service
-
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ServiceValidationError
+import pytest
+from pytest_homeassistant_custom_component.common import async_mock_service
 
 from custom_components.briefly.const import DOMAIN
 
@@ -28,11 +27,15 @@ async def test_get_stories(hass: HomeAssistant, feeds) -> None:
     assert result["stories"][0]["colour"] == "#1e88e5"
 
     uk = await call(
-        hass, "get_stories", {"section": "uk", "count": 10, "config_entry_id": entry.entry_id}, response=True
+        hass,
+        "get_stories",
+        {"section": "uk", "count": 10, "config_entry_id": entry.entry_id},
+        response=True,
     )
-    assert len(uk["stories"]) == 3 and {s["section"] for s in uk["stories"]} == {"UK"}
+    assert len(uk["stories"]) == 3
+    assert {s["section"] for s in uk["stories"]} == {"UK"}
 
-    with pytest.raises(ServiceValidationError, match="section_not_found|No section"):
+    with pytest.raises(ServiceValidationError, match=r"section_not_found|No section"):
         await call(hass, "get_stories", {"section": "Weather"}, response=True)
 
 
@@ -98,7 +101,7 @@ async def test_speak_headlines(hass: HomeAssistant, feeds) -> None:
 async def test_speak_headlines_errors(hass: HomeAssistant, feeds) -> None:
     off = make_entry("Hall news")
     await setup_entry(hass, off)
-    with pytest.raises(ServiceValidationError, match="alexa_disabled|switched off"):
+    with pytest.raises(ServiceValidationError, match=r"alexa_disabled|switched off"):
         await call(hass, "speak_headlines", {"config_entry_id": off.entry_id})
 
     on = make_entry(alexa=True)
@@ -106,11 +109,11 @@ async def test_speak_headlines_errors(hass: HomeAssistant, feeds) -> None:
     hass.config_entries.async_update_entry(on, options={**on.options, "alexa_targets": []})
     await hass.config_entries.async_setup(on.entry_id)
     await hass.async_block_till_done()
-    with pytest.raises(ServiceValidationError, match="alexa_no_targets|Echo"):
+    with pytest.raises(ServiceValidationError, match=r"alexa_no_targets|Echo"):
         await call(hass, "speak_headlines", {"config_entry_id": on.entry_id})
 
     # Alexa Media Player is not installed: a clear error, not a crash.
-    with pytest.raises(ServiceValidationError, match="alexa_media_missing|Alexa Media Player"):
+    with pytest.raises(ServiceValidationError, match=r"alexa_media_missing|Alexa Media Player"):
         await call(
             hass,
             "speak_headlines",

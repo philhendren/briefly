@@ -47,9 +47,7 @@ PRESET_FEEDS: Final[dict[str, PresetFeed]] = {
             "Politics",
             "https://feeds.bbci.co.uk/news/politics/rss.xml",
         ),
-        PresetFeed(
-            "bbc_world", _BBC, "World", "https://feeds.bbci.co.uk/news/world/rss.xml"
-        ),
+        PresetFeed("bbc_world", _BBC, "World", "https://feeds.bbci.co.uk/news/world/rss.xml"),
         PresetFeed(
             "bbc_business",
             _BBC,
@@ -68,12 +66,8 @@ PRESET_FEEDS: Final[dict[str, PresetFeed]] = {
             "Science & Environment",
             "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
         ),
-        PresetFeed(
-            "bbc_health", _BBC, "Health", "https://feeds.bbci.co.uk/news/health/rss.xml"
-        ),
-        PresetFeed(
-            "bbc_sport", _BBC_SPORT, "Sport", "https://feeds.bbci.co.uk/sport/rss.xml"
-        ),
+        PresetFeed("bbc_health", _BBC, "Health", "https://feeds.bbci.co.uk/news/health/rss.xml"),
+        PresetFeed("bbc_sport", _BBC_SPORT, "Sport", "https://feeds.bbci.co.uk/sport/rss.xml"),
         PresetFeed("guardian_uk", _GUARDIAN, "UK", "https://www.theguardian.com/uk/rss"),
         PresetFeed(
             "guardian_politics",
@@ -81,9 +75,7 @@ PRESET_FEEDS: Final[dict[str, PresetFeed]] = {
             "Politics",
             "https://www.theguardian.com/politics/rss",
         ),
-        PresetFeed(
-            "guardian_world", _GUARDIAN, "World", "https://www.theguardian.com/world/rss"
-        ),
+        PresetFeed("guardian_world", _GUARDIAN, "World", "https://www.theguardian.com/world/rss"),
         PresetFeed(
             "guardian_business",
             _GUARDIAN,
@@ -108,18 +100,14 @@ PRESET_FEEDS: Final[dict[str, PresetFeed]] = {
             "Sport",
             "https://www.theguardian.com/uk/sport/rss",
         ),
-        PresetFeed(
-            "standard_uk", _STANDARD, "UK", "https://www.standard.co.uk/news/uk/rss"
-        ),
+        PresetFeed("standard_uk", _STANDARD, "UK", "https://www.standard.co.uk/news/uk/rss"),
         PresetFeed(
             "standard_politics",
             _STANDARD,
             "Politics",
             "https://www.standard.co.uk/news/politics/rss",
         ),
-        PresetFeed(
-            "standard_sport", _STANDARD, "Sport", "https://www.standard.co.uk/sport/rss"
-        ),
+        PresetFeed("standard_sport", _STANDARD, "Sport", "https://www.standard.co.uk/sport/rss"),
         PresetFeed(
             "aljazeera_all",
             _ALJAZEERA,
@@ -144,4 +132,3 @@ SUGGESTED_SECTIONS: Final[list[tuple[str, str, list[str]]]] = [
     ("Politics", "#8e24aa", ["bbc_politics", "guardian_politics"]),
     ("Sport", "#43a047", ["bbc_sport", "guardian_sport"]),
 ]
-

@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import voluptuous as vol
-
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import (
     HomeAssistant,
@@ -16,6 +14,7 @@ from homeassistant.core import (
 )
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
+import voluptuous as vol
 
 from .const import (
     ATTR_CONFIG_ENTRY_ID,
@@ -45,9 +44,7 @@ GET_STORIES_SCHEMA = vol.Schema(
     {
         **ENTRY_SCHEMA,
         vol.Optional(ATTR_SECTION): cv.string,
-        vol.Optional(ATTR_COUNT, default=5): vol.All(
-            vol.Coerce(int), vol.Range(min=1, max=25)
-        ),
+        vol.Optional(ATTR_COUNT, default=5): vol.All(vol.Coerce(int), vol.Range(min=1, max=25)),
     }
 )
 SUMMARISE_SCHEMA = vol.Schema({vol.Required(ATTR_STORY_ID): cv.string})
@@ -55,9 +52,7 @@ SPEAK_SCHEMA = vol.Schema(
     {
         **ENTRY_SCHEMA,
         vol.Optional(ATTR_SECTION): cv.string,
-        vol.Optional(ATTR_COUNT, default=3): vol.All(
-            vol.Coerce(int), vol.Range(min=1, max=10)
-        ),
+        vol.Optional(ATTR_COUNT, default=3): vol.All(vol.Coerce(int), vol.Range(min=1, max=10)),
         vol.Optional(ATTR_TARGETS): cv.entity_ids,
     }
 )
@@ -67,9 +62,7 @@ def _entries(hass: HomeAssistant, entry_id: str | None) -> list[BrieflyConfigEnt
     if entry_id is None:
         entries = hass.config_entries.async_loaded_entries(DOMAIN)
         if not entries:
-            raise ServiceValidationError(
-                translation_domain=DOMAIN, translation_key="no_desks"
-            )
+            raise ServiceValidationError(translation_domain=DOMAIN, translation_key="no_desks")
         return entries
     entry = hass.config_entries.async_get_entry(entry_id)
     if entry is None or entry.domain != DOMAIN or entry.state is not ConfigEntryState.LOADED:
@@ -123,8 +116,7 @@ async def _get_stories(call: ServiceCall) -> ServiceResponse:
     picked, _section = _select(entries, call.data.get(ATTR_SECTION), call.data[ATTR_COUNT])
     return {
         "stories": [
-            {**story.as_dict(), "section": sec.name, "colour": sec.colour}
-            for sec, story in picked
+            {**story.as_dict(), "section": sec.name, "colour": sec.colour} for sec, story in picked
         ]
     }
 
@@ -137,9 +129,7 @@ async def _summarise(call: ServiceCall) -> ServiceResponse:
         if story is None:
             continue
         if not coordinator.summaries_enabled:
-            raise ServiceValidationError(
-                translation_domain=DOMAIN, translation_key="summaries_off"
-            )
+            raise ServiceValidationError(translation_domain=DOMAIN, translation_key="summaries_off")
         if story.summary_status != STATUS_DONE:
             await coordinator.async_summarise_story(story)
             coordinator.cache.schedule_save()
@@ -162,13 +152,9 @@ async def _speak_headlines(call: ServiceCall) -> None:
             translation_key="alexa_disabled",
             translation_placeholders={"desk": entry.title},
         )
-    targets: list[str] = call.data.get(ATTR_TARGETS) or entry.options.get(
-        CONF_ALEXA_TARGETS, []
-    )
+    targets: list[str] = call.data.get(ATTR_TARGETS) or entry.options.get(CONF_ALEXA_TARGETS, [])
     if not targets:
-        raise ServiceValidationError(
-            translation_domain=DOMAIN, translation_key="alexa_no_targets"
-        )
+        raise ServiceValidationError(translation_domain=DOMAIN, translation_key="alexa_no_targets")
     picked, section = _select([entry], call.data.get(ATTR_SECTION), call.data[ATTR_COUNT])
     message = build_headline_script(
         entry.title, [story for _s, story in picked], section.name if section else None
@@ -194,7 +180,4 @@ def async_register_services(hass: HomeAssistant) -> None:
         SUMMARISE_SCHEMA,
         supports_response=SupportsResponse.OPTIONAL,
     )
-    hass.services.async_register(
-        DOMAIN, SERVICE_SPEAK_HEADLINES, _speak_headlines, SPEAK_SCHEMA
-    )
-
+    hass.services.async_register(DOMAIN, SERVICE_SPEAK_HEADLINES, _speak_headlines, SPEAK_SCHEMA)

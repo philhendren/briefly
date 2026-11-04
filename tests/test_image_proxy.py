@@ -16,7 +16,9 @@ SMALL = "https://ichef.bbci.co.uk/ace/standard/480/cpsprodpb/aaa/live/homes.jpg"
 LARGE = "https://ichef.bbci.co.uk/ace/standard/976/cpsprodpb/aaa/live/homes.jpg"
 
 
-async def test_proxy_serves_and_caches(hass: HomeAssistant, hass_client_no_auth, aioclient_mock) -> None:
+async def test_proxy_serves_and_caches(
+    hass: HomeAssistant, hass_client_no_auth, aioclient_mock
+) -> None:
     aioclient_mock.get(SMALL, content=b"small-jpeg", headers={"Content-Type": "image/jpeg"})
     aioclient_mock.get(LARGE, content=b"large-jpeg", headers={"Content-Type": "image/jpeg"})
     register_feeds(aioclient_mock)
@@ -37,7 +39,9 @@ async def test_proxy_serves_and_caches(hass: HomeAssistant, hass_client_no_auth,
     assert aioclient_mock.call_count == 0  # served from the disk cache
 
 
-async def test_proxy_unknown_and_failing(hass: HomeAssistant, hass_client_no_auth, aioclient_mock) -> None:
+async def test_proxy_unknown_and_failing(
+    hass: HomeAssistant, hass_client_no_auth, aioclient_mock
+) -> None:
     aioclient_mock.get(SMALL, exc=CONNECTION_ERROR)
     register_feeds(aioclient_mock)
     await setup_entry(hass, make_entry())
@@ -60,10 +64,14 @@ async def test_prune_image_cache(tmp_path) -> None:
     os.utime(old, (past, past))
     os.utime(meta, (past, past))
     assert prune_image_cache(folder, 10) == 1
-    assert not old.exists() and not meta.exists() and fresh.exists()
+    assert not old.exists()
+    assert not meta.exists()
+    assert fresh.exists()
 
 
-async def test_expired_cache_entry_is_refetched(hass: HomeAssistant, hass_client_no_auth, aioclient_mock) -> None:
+async def test_expired_cache_entry_is_refetched(
+    hass: HomeAssistant, hass_client_no_auth, aioclient_mock
+) -> None:
     aioclient_mock.get(SMALL, content=b"v1", headers={"Content-Type": "image/jpeg"})
     register_feeds(aioclient_mock)
     await setup_entry(hass, make_entry())

@@ -39,8 +39,8 @@ from .const import (
 from .dedup import dedupe
 from .extract import extract_article_text
 from .feeds import FeedError, parse_feed
-from .image_proxy import image_cache_dir, prune_image_cache
 from .http import ARTICLE_OK, FEED_NOT_MODIFIED, FEED_OK, BrieflyHttp
+from .image_proxy import image_cache_dir, prune_image_cache
 from .models import BrieflyData, Section, Story
 from .ollama import OllamaError, OllamaSummariser, numbers_supported
 from .sources import PRESET_FEEDS
@@ -115,9 +115,7 @@ class BrieflyCoordinator(DataUpdateCoordinator[BrieflyData]):
             _LOGGER.warning("Could not fetch %s: %s", ref.url, result.error)
             return False
         try:
-            parsed = await self.hass.async_add_executor_job(
-                parse_feed, result.content, ref.source
-            )
+            parsed = await self.hass.async_add_executor_job(parse_feed, result.content, ref.source)
         except FeedError:
             _LOGGER.warning("%s is not a valid RSS or Atom feed", ref.url)
             return False

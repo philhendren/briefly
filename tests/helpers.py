@@ -15,14 +15,13 @@ from typing import Any
 from xml.sax.saxutils import escape
 
 import aiohttp
+from homeassistant.core import HomeAssistant
+from homeassistant.util import dt as dt_util
 from pytest_homeassistant_custom_component.test_util.aiohttp import (
     AiohttpClientMocker,
     AiohttpClientMockResponse,
 )
 from yarl import URL
-
-from homeassistant.core import HomeAssistant
-from homeassistant.util import dt as dt_util
 
 from custom_components.briefly.const import (
     CONF_ALEXA_ENABLED,
@@ -93,7 +92,9 @@ def rss(title: str, items: list[Item]) -> str:
             attrs = f' width="{width}"' if width else ' medium="image"'
             parts.append(f'<media:content url="{escape(url)}"{attrs}/>')
         if item.enclosure:
-            parts.append(f'<enclosure url="{escape(item.enclosure)}" type="image/jpeg" length="1"/>')
+            parts.append(
+                f'<enclosure url="{escape(item.enclosure)}" type="image/jpeg" length="1"/>'
+            )
         parts.append("</item>")
     parts.append("</channel></rss>")
     return "".join(parts)
@@ -225,13 +226,9 @@ def register_feeds(aioclient_mock: AiohttpClientMocker) -> None:
     aioclient_mock.get(BBC_UK, text=bbc_uk_feed(), headers={**XML, "ETag": '"bbc1"'})
     aioclient_mock.get(GUARDIAN_UK, text=guardian_uk_feed(), headers=XML)
     aioclient_mock.get(BBC_SPORT, text=sport_feed("BBC Sport", "bbc"), headers=XML)
-    aioclient_mock.get(
-        GUARDIAN_SPORT, text=sport_feed("Guardian Sport", "guardian"), headers=XML
-    )
+    aioclient_mock.get(GUARDIAN_SPORT, text=sport_feed("Guardian Sport", "guardian"), headers=XML)
     aioclient_mock.get("https://www.bbc.co.uk/robots.txt", text="User-agent: *\nDisallow: /cbbc\n")
-    aioclient_mock.get(
-        "https://www.theguardian.com/robots.txt", text="User-agent: *\nAllow: /\n"
-    )
+    aioclient_mock.get("https://www.theguardian.com/robots.txt", text="User-agent: *\nAllow: /\n")
     aioclient_mock.get("https://sport.example.com/robots.txt", status=404)
     aioclient_mock.get(
         "https://www.bbc.co.uk/news/articles/homes1", text=article_html(HOMES_PARAS), headers=HTML
@@ -330,7 +327,6 @@ class FakeOllama:
             url,
             json={"model": data["model"], "message": {"role": "assistant", "content": content}},
         )
-
 
 
 # Config entries -----------------------------------------------------------------
