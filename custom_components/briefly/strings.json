@@ -1,0 +1,326 @@
+{
+  "title": "Briefly",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Name your news desk",
+        "description": "One Briefly entry is one news desk, for example \"Kiosk news\". Its sensors are named after it.",
+        "data": {
+          "name": "Desk name"
+        }
+      },
+      "section": {
+        "title": "Add a section",
+        "description": "Sections added so far: {count}. Each section is one column of news.",
+        "data": {
+          "section_name": "Section name",
+          "colour": "Colour",
+          "feeds": "News sources",
+          "custom_feeds": "Other feed URLs (optional)",
+          "add_another": "Add another section after this one"
+        },
+        "data_description": {
+          "section_name": "Shown as the column heading, for example UK, Politics or Sport.",
+          "colour": "Accent colour for this section on dashboards.",
+          "feeds": "Tick the sources this section should show. Every preset allows automated fetching, so summaries can be written for it.",
+          "custom_feeds": "Any other RSS or Atom feed, one URL per line. Briefly checks each one before saving."
+        }
+      },
+      "summaries": {
+        "title": "Summaries",
+        "description": "Briefly can write a short summary of each story with a local AI model running in Ollama. With summaries off, each story shows the description from its feed.\n\nDon't have Ollama yet? Download it from {ollama_url}.",
+        "data": {
+          "summary_mode": "Summaries"
+        }
+      },
+      "ollama": {
+        "title": "Ollama server",
+        "description": "Enter the address of your Ollama server. If you already use Home Assistant's Ollama integration ({ha_ollama_url}) its address is filled in for you.\n\nTo install Ollama, see {ollama_url}.",
+        "data": {
+          "ollama_url": "Ollama URL"
+        }
+      },
+      "model": {
+        "title": "Model",
+        "description": "Pick a model installed on your Ollama server. Choosing the same model as Home Assistant's Ollama integration (currently {ha_model}) avoids loading a second model onto the GPU.",
+        "data": {
+          "model": "Model",
+          "summary_length": "Summary length"
+        }
+      },
+      "voice": {
+        "title": "Spoken headlines (optional)",
+        "description": "Briefly can read headlines aloud on Amazon Echo devices using the `briefly.speak_headlines` action.\n\nThis needs **Alexa Media Player**, a separate custom integration that you install from HACS ({alexa_media_url}). It is not part of Briefly or of Home Assistant.",
+        "data": {
+          "alexa_enabled": "Speak headlines on Alexa",
+          "alexa_targets": "Echo devices"
+        },
+        "data_description": {
+          "alexa_targets": "Media players created by Alexa Media Player."
+        }
+      }
+    },
+    "error": {
+      "name_required": "Enter a name.",
+      "name_exists": "A section with this name already exists.",
+      "invalid_url": "{url} is not a web address (it must start with http:// or https://).",
+      "invalid_feed": "{url} is not a working RSS or Atom feed.",
+      "no_feeds": "Choose at least one news source or add a feed URL.",
+      "cannot_connect": "Could not reach Ollama at that address.",
+      "no_models": "Ollama has no models installed. Run `ollama pull <model>` on the Ollama server first.",
+      "alexa_media_missing": "Alexa Media Player isn't installed or set up. Install it from HACS first, or leave spoken headlines off.",
+      "targets_required": "Choose at least one Echo device."
+    },
+    "abort": {
+      "already_configured": "A news desk with this name already exists."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Briefly options",
+        "menu_options": {
+          "settings": "Refresh, story counts and duplicates",
+          "add_section": "Add a section",
+          "edit_section": "Change or remove a section",
+          "summaries": "Summaries and model",
+          "voice": "Spoken headlines (Alexa)"
+        }
+      },
+      "settings": {
+        "title": "Settings",
+        "data": {
+          "refresh_minutes": "Refresh interval",
+          "stories_per_section": "Stories kept per section",
+          "max_age_hours": "Maximum story age",
+          "dedup": "Duplicate threshold",
+          "summaries_per_refresh": "Summaries per refresh"
+        },
+        "data_description": {
+          "summaries_per_refresh": "Caps the work sent to Ollama each refresh, so a backlog never ties up the GPU. Section leads go first."
+        }
+      },
+      "add_section": {
+        "title": "Add a section",
+        "data": {
+          "section_name": "Section name",
+          "colour": "Colour",
+          "feeds": "News sources",
+          "custom_feeds": "Other feed URLs (optional)"
+        },
+        "data_description": {
+          "section_name": "Shown as the column heading, for example UK, Politics or Sport.",
+          "colour": "Accent colour for this section on dashboards.",
+          "feeds": "Tick the sources this section should show. Every preset allows automated fetching, so summaries can be written for it.",
+          "custom_feeds": "Any other RSS or Atom feed, one URL per line. Briefly checks each one before saving."
+        }
+      },
+      "edit_section": {
+        "title": "Change a section",
+        "data": {
+          "edit_section_id": "Section"
+        }
+      },
+      "section_details": {
+        "title": "Change {section}",
+        "description": "Cached summaries are kept when you change or remove a section.",
+        "data": {
+          "section_name": "Section name",
+          "colour": "Colour",
+          "feeds": "News sources",
+          "custom_feeds": "Other feed URLs (optional)",
+          "delete": "Remove this section"
+        },
+        "data_description": {
+          "section_name": "Shown as the column heading, for example UK, Politics or Sport.",
+          "colour": "Accent colour for this section on dashboards.",
+          "feeds": "Tick the sources this section should show. Every preset allows automated fetching, so summaries can be written for it.",
+          "custom_feeds": "Any other RSS or Atom feed, one URL per line. Briefly checks each one before saving."
+        }
+      },
+      "summaries": {
+        "title": "Summaries",
+        "description": "Briefly can write a short summary of each story with a local AI model running in Ollama. With summaries off, each story shows the description from its feed.\n\nDon't have Ollama yet? Download it from {ollama_url}.",
+        "data": {
+          "summary_mode": "Summaries"
+        }
+      },
+      "ollama": {
+        "title": "Ollama server",
+        "description": "Enter the address of your Ollama server. If you already use Home Assistant's Ollama integration ({ha_ollama_url}) its address is filled in for you.\n\nTo install Ollama, see {ollama_url}.",
+        "data": {
+          "ollama_url": "Ollama URL"
+        }
+      },
+      "model": {
+        "title": "Model",
+        "description": "Pick a model installed on your Ollama server. Choosing the same model as Home Assistant's Ollama integration (currently {ha_model}) avoids loading a second model onto the GPU.",
+        "data": {
+          "model": "Model",
+          "summary_length": "Summary length"
+        }
+      },
+      "voice": {
+        "title": "Spoken headlines (optional)",
+        "description": "Briefly can read headlines aloud on Amazon Echo devices using the `briefly.speak_headlines` action.\n\nThis needs **Alexa Media Player**, a separate custom integration that you install from HACS ({alexa_media_url}). It is not part of Briefly or of Home Assistant.",
+        "data": {
+          "alexa_enabled": "Speak headlines on Alexa",
+          "alexa_targets": "Echo devices"
+        },
+        "data_description": {
+          "alexa_targets": "Media players created by Alexa Media Player."
+        }
+      }
+    },
+    "error": {
+      "name_required": "Enter a name.",
+      "name_exists": "A section with this name already exists.",
+      "invalid_url": "{url} is not a web address (it must start with http:// or https://).",
+      "invalid_feed": "{url} is not a working RSS or Atom feed.",
+      "no_feeds": "Choose at least one news source or add a feed URL.",
+      "cannot_connect": "Could not reach Ollama at that address.",
+      "no_models": "Ollama has no models installed. Run `ollama pull <model>` on the Ollama server first.",
+      "alexa_media_missing": "Alexa Media Player isn't installed or set up. Install it from HACS first, or leave spoken headlines off.",
+      "targets_required": "Choose at least one Echo device.",
+      "last_section": "A desk needs at least one section."
+    },
+    "abort": {
+      "no_sections": "This desk has no sections yet."
+    }
+  },
+  "selector": {
+    "summary_mode": {
+      "options": {
+        "off": "Off: show the feed's own description",
+        "ollama": "Ollama: summarise with a local model"
+      }
+    },
+    "summary_length": {
+      "options": {
+        "headline": "Headline only (one sentence)",
+        "short": "Short (90–140 words)",
+        "medium": "Medium (150–220 words)"
+      }
+    },
+    "dedup": {
+      "options": {
+        "off": "Off",
+        "loose": "Loose (fold more stories together)",
+        "normal": "Normal",
+        "strict": "Strict (fold only near-identical headlines)"
+      }
+    }
+  },
+  "entity": {
+    "button": {
+      "refresh": {
+        "name": "Refresh"
+      }
+    },
+    "event": {
+      "new_story": {
+        "name": "New story",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "new_story": "New story"
+            }
+          }
+        }
+      }
+    },
+    "sensor": {
+      "last_updated": {
+        "name": "Last updated"
+      }
+    }
+  },
+  "exceptions": {
+    "no_desks": {
+      "message": "No Briefly news desk is loaded."
+    },
+    "desk_not_found": {
+      "message": "No loaded Briefly news desk has the id {entry_id}."
+    },
+    "section_not_found": {
+      "message": "No section called {section}."
+    },
+    "story_not_found": {
+      "message": "No listed story has the id {story_id}."
+    },
+    "summaries_off": {
+      "message": "Summaries are switched off for this news desk."
+    },
+    "alexa_disabled": {
+      "message": "Spoken headlines are switched off for {desk}. Turn them on under Configure → Spoken headlines."
+    },
+    "alexa_no_targets": {
+      "message": "Choose at least one Echo device, in the desk's options or with the targets field."
+    },
+    "alexa_media_missing": {
+      "message": "Alexa Media Player is not installed. It is a separate custom integration available from HACS."
+    }
+  },
+  "services": {
+    "refresh": {
+      "name": "Refresh",
+      "description": "Fetch the feeds now.",
+      "fields": {
+        "config_entry_id": {
+          "name": "News desk",
+          "description": "Only refresh this desk. Leave empty for all desks."
+        }
+      }
+    },
+    "get_stories": {
+      "name": "Get stories",
+      "description": "Return stories as an action response, for scripts and voice.",
+      "fields": {
+        "config_entry_id": {
+          "name": "News desk",
+          "description": "Only use this desk. Leave empty for all desks."
+        },
+        "section": {
+          "name": "Section",
+          "description": "Only this section, by name. Leave empty for all sections."
+        },
+        "count": {
+          "name": "Count",
+          "description": "How many stories to return."
+        }
+      }
+    },
+    "summarise": {
+      "name": "Summarise",
+      "description": "Summarise one story now.",
+      "fields": {
+        "story_id": {
+          "name": "Story id",
+          "description": "The id of a listed story."
+        }
+      }
+    },
+    "speak_headlines": {
+      "name": "Speak headlines",
+      "description": "Read the top headlines aloud on Echo devices through Alexa Media Player (a separate custom integration).",
+      "fields": {
+        "config_entry_id": {
+          "name": "News desk",
+          "description": "The desk to read from. Leave empty for the first desk."
+        },
+        "section": {
+          "name": "Section",
+          "description": "Only this section, by name. Leave empty for all sections."
+        },
+        "count": {
+          "name": "Count",
+          "description": "How many headlines to read."
+        },
+        "targets": {
+          "name": "Echo devices",
+          "description": "Override the devices chosen in the desk's options."
+        }
+      }
+    }
+  }
+}

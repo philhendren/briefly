@@ -1,0 +1,4 @@
+pytest-homeassistant-custom-component
+pytest-bdd>=8
+pytest-cov
+feedparser>=6.0.11
