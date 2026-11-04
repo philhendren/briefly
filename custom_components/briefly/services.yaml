@@ -1,0 +1,56 @@
+refresh:
+  fields:
+    config_entry_id:
+      selector:
+        config_entry:
+          integration: briefly
+
+get_stories:
+  fields:
+    config_entry_id:
+      selector:
+        config_entry:
+          integration: briefly
+    section:
+      example: "UK"
+      selector:
+        text:
+    count:
+      default: 5
+      selector:
+        number:
+          min: 1
+          max: 25
+          mode: box
+
+summarise:
+  fields:
+    story_id:
+      required: true
+      example: "b535275147"
+      selector:
+        text:
+
+speak_headlines:
+  fields:
+    config_entry_id:
+      selector:
+        config_entry:
+          integration: briefly
+    section:
+      example: "UK"
+      selector:
+        text:
+    count:
+      default: 3
+      selector:
+        number:
+          min: 1
+          max: 10
+          mode: box
+    targets:
+      selector:
+        entity:
+          domain: media_player
+          integration: alexa_media
+          multiple: true

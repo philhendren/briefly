@@ -1,0 +1,13 @@
+{
+  "entity": {
+    "button": { "refresh": { "default": "mdi:refresh" } },
+    "event": { "new_story": { "default": "mdi:newspaper-plus" } },
+    "sensor": { "last_updated": { "default": "mdi:clock-check-outline" } }
+  },
+  "services": {
+    "refresh": { "service": "mdi:refresh" },
+    "get_stories": { "service": "mdi:newspaper-variant-multiple" },
+    "summarise": { "service": "mdi:text-box-check-outline" },
+    "speak_headlines": { "service": "mdi:account-voice" }
+  }
+}
